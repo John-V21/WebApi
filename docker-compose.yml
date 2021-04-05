@@ -1,0 +1,33 @@
+version: '3.4'
+
+services:
+  accepted:
+    image: ${DOCKER_REGISTRY-}accepted
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: [ "5001:5001" ]
+    environment:
+      - ConnectionStrings:ConnectionMssql=Data Source=sql-server;Initial Catalog=Accepted;Integrated Security=False;Persist Security Info=False;User ID=sa;Password=zaq123321qaz!!
+      - ASPNETCORE_URLS=http://localhost:5001
+    networks:
+      - backend
+    depends_on:
+      - mssql
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    hostname: sql-server
+    container_name: sql-server
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=zaq123321qaz!!
+    networks:
+      - backend
+
+networks:
+  backend:
+
+
