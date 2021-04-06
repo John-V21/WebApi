@@ -17,7 +17,10 @@ RUN dotnet publish "accepted.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+COPY wait-for-it.sh wait-for-it.sh
+RUN chmod +x wait-for-it.sh
+
 EXPOSE 5001
-ENTRYPOINT ["dotnet", "Accepted.dll"]
-#RUN chmod +x ./entrypoint.sh
-#CMD /bin/bash ./entrypoint.sh
+#ENTRYPOINT ["dotnet", "Accepted.dll"]
+

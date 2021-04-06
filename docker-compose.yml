@@ -12,6 +12,7 @@ services:
       - ASPNETCORE_URLS=http://localhost:5001
     networks:
       - backend
+    command: ["./wait-for-it.sh", "mssql:1433", "-t", "90", "--", "dotnet", "Accepted.dll"]
     depends_on:
       - mssql
 
