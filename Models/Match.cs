@@ -8,7 +8,7 @@ namespace Accepted.Models
 
 
     [Table("Match")]
-    public class Match: IValidatableObject
+    public class Match
     {
         public enum SportType
         {
@@ -28,7 +28,6 @@ namespace Accepted.Models
 
         [Required]
         [Column(TypeName = "Time")]
-        [DataType(DataType.Time)]
         public TimeSpan MatchTime { get; set; }
 
         [Required]
@@ -41,15 +40,6 @@ namespace Accepted.Models
         [Column(TypeName = "Numeric(1)")]
         public SportType Sport { get; set; }
 
-
         public List<MatchOdd> MatchOdds { get; set; }
-
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (this.TeamA == this.TeamB)
-            {
-                yield return new ValidationResult("TeamA and TeamB must be different");
-            }
-        }
     }
 }

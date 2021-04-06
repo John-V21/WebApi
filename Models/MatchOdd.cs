@@ -11,7 +11,6 @@ namespace Accepted.Models
         public int Id { get; set; }
 
         [Required]
-        [RegularExpression("[1xX2].")]
         public char Specifier { get; set; }
 
         [Required]
