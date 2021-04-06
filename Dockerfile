@@ -16,7 +16,6 @@ RUN dotnet publish "accepted.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY entrypoint.sh entrypoint.sh
 COPY --from=publish /app/publish .
 EXPOSE 5001
 ENTRYPOINT ["dotnet", "Accepted.dll"]
