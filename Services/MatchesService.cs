@@ -6,16 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Accepted.DBContext;
 using Accepted.Models;
+using Accepted.FluentValidation;
 
 namespace Accepted.Services
 {
     public class MatchesService : IMatchesService
     {
         private readonly AppDbContext _context;
+        private readonly FluentValidator _modelValidators;
 
-        public MatchesService(AppDbContext context)
+
+        public MatchesService(AppDbContext context, FluentValidator modelValidators)
         {
             _context = context;
+            _modelValidators = modelValidators;
+
         }
 
         public async Task<IEnumerable<Match>> Get()
@@ -32,8 +37,10 @@ namespace Accepted.Services
         {
             if (id != match.Id)
             {
-                throw new ArgumentException("Invalid id");
+                throw new ApplicationException("Invalid Id");
             }
+
+            _modelValidators.ThrowIfInvalid(match);
 
             _context.Entry(match).State = EntityState.Modified;
 
@@ -41,24 +48,33 @@ namespace Accepted.Services
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
                 if (!Exists(id))
                 {
-                    throw new KeyNotFoundException();
+                    throw new ApplicationException("Key does not exists");
                 }
                 else
                 {
-                    throw;
+                    throw new ApplicationException(ex.Message);
                 }
             }
         }
 
         public async Task<Match> Add(Match match)
         {
-            var addedMatch = _context.Matches.Add(match);
-            await _context.SaveChangesAsync();
-            return addedMatch.Entity;
+            try
+            {
+                _modelValidators.ThrowIfInvalid(match);
+
+                var addedMatch = _context.Matches.Add(match);
+                await _context.SaveChangesAsync();
+                return addedMatch.Entity;
+            }
+            catch(DbUpdateException ex)
+            {
+                throw new ApplicationException(ex.InnerException?.Message ?? ex.Message);
+            }
         }
 
         public async Task<Match> Delete(int id)
@@ -66,7 +82,7 @@ namespace Accepted.Services
             var match = await _context.Matches.FindAsync(id);
             if (match == null)
             {
-                throw new KeyNotFoundException();
+                throw new ApplicationException("Key does not exists");
             }
 
             _context.Matches.Remove(match);
