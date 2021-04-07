@@ -12,7 +12,7 @@ services.AddFluentValidation( c => c.Add<MatchOddValidator>().Add<MatchValidator
 manually test an object using injecsted validators
 
 ```
-fluentValidator.ThrowIfInvalid(macth)
+fluentValidator.ThrowIfInvalid(match)
 ```
 
 
