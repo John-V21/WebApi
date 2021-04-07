@@ -1,8 +1,22 @@
-Simple DotNet Core WebApi using DI, EF, Services, Controllers, DTOs, AutoMapper, Swagger, MSSql Server.
+*DotNet Core WebApi using DI, EF, Services, Controllers, DTOs, AutoMapper, Swagger, MSSql Server*
 
-TODO: Improvements Exception handling, Swagger API definition
+###### FluentValidation using DI and manual validation
 
-Docker Support
+Inject validators on startup (injects FluentValidator)
+
+```
+services.AddFluentValidation( c => c.Add<MatchOddValidator>().Add<MatchValidator>()
+);
+```
+
+manually test an object using injecsted validators
+
+```
+fluentValidator.ThrowIfInvalid(macth)
+```
+
+
+###### Docker Support
 
 docker-compose build
 
