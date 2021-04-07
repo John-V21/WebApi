@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Accepted.DBContext;
 using Accepted.Models;
 using Accepted.DTOs;
 using AutoMapper;
 using Accepted.Services;
 using System.Net.Mime;
+using Accepted.FluentValidation;
 
 namespace Accepted.Controllers
 {
@@ -20,6 +19,7 @@ namespace Accepted.Controllers
     {
         private readonly IMatchOddsService _matchOddsService;
         private readonly IMapper _mapper;
+        public static IActionResult ValidationError(ValidationErrorsException ex) => new JsonResult(ex.Errors) { StatusCode = 422 };
 
         public MatchOddsController(IMatchOddsService matchService, IMapper mapper)
         {
@@ -60,13 +60,17 @@ namespace Accepted.Controllers
 
         [HttpPut("{id}")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(ValidationErrorList))]
         public async Task<IActionResult> Put(int id, MatchOddDto match)
         {
             try
             {
                 await _matchOddsService.Save(id, _mapper.Map<MatchOdd>(match));
+            }
+            catch (ValidationErrorsException ve)
+            {
+                return ValidationError(ve);
             }
             catch (Exception ex)
             {
@@ -79,13 +83,18 @@ namespace Accepted.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(MatchOddDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Match>> Post(MatchOddDto MatchOddDto)
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(ValidationErrorList))]
+        public async Task<IActionResult> Post(MatchOddDto MatchOddDto)
         {
             try
             {
                 var match = await _matchOddsService.Add(_mapper.Map<MatchOddDto, MatchOdd>(MatchOddDto));
                 MatchOddDto = _mapper.Map<MatchOddDto>(match);
                 return CreatedAtAction("Get", new { id = MatchOddDto.Id }, MatchOddDto);
+            }
+            catch (ValidationErrorsException ve)
+            {
+                return ValidationError(ve);
             }
             catch (Exception ex)
             {
