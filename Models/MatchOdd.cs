@@ -11,7 +11,7 @@ namespace Accepted.Models
         public int Id { get; set; }
 
         [Required]
-        public char Specifier { get; set; }
+        public string Specifier { get; set; }
 
         [Required]
         [Column(TypeName = "decimal(3, 2)")]

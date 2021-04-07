@@ -6,7 +6,7 @@ namespace Accepted.DTOs
     {
         public int Id { get; set; }
 
-        public char Specifier { get; set; }
+        public string Specifier { get; set; }
 
         public Decimal Odd { get; set; }
 
