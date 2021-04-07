@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Accepted.ModelValidators;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Accepted
 {
@@ -30,7 +32,17 @@ namespace Accepted
              services.AddDbContext<AppDbContext>(
                      options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionMssql")));
             services.AddAutoMapper(typeof(Startup));
-            services.AddSwaggerGen();
+            services.AddSwaggerGen( c => {
+                c.SwaggerDoc("v1", new OpenApiInfo 
+                {
+                    Title="Web API",
+                    Version="v1",
+                    Description="This is an educational web api"
+                });
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = System.IO.Path.Combine(System.AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

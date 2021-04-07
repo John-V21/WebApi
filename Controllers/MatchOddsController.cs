@@ -13,6 +13,7 @@ using Accepted.FluentValidation;
 
 namespace Accepted.Controllers
 {
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class MatchOddsController : ControllerBase
@@ -27,16 +28,25 @@ namespace Accepted.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Matches
+        /// <summary>
+        /// Get all matches
+        /// </summary>
+        /// <response code="200">List of Items</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IList<MatchOddDto>))]
         public async Task<ActionResult<IEnumerable<MatchOddDto>>> GetMAll()
         {
             var list = await _matchOddsService.Get();
             return list.Select(m => _mapper.Map<MatchOddDto>(m)).ToList();
         }
 
-        // GET: api/Matches/5
+        /// <summary>
+        /// Get match odd by id
+        /// </summary>
+        /// <param name="id">Match Odd id</param>
+        /// <response code="200">Item</response>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MatchOddDto))]
         public async Task<ActionResult<MatchOddDto>> Get(int id)
         {
             var match = await _matchOddsService.Get(id);
@@ -50,14 +60,25 @@ namespace Accepted.Controllers
             return MatchOddDto;
         }
 
+        /// <summary>
+        /// Get a list of match odds by match id
+        /// </summary>
+        /// <param name="id">Match id</param>
+        /// <response code="200">Item</response>
         [HttpGet("match/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IList<MatchOddDto>))]
         public ActionResult<IEnumerable<MatchOddDto>> GetByMatch(int id)
         {
             var matchOdds = _matchOddsService.GetByMatch(id);
             return matchOdds.Select(mo => _mapper.Map<MatchOddDto>(mo)).ToList();
         }
 
-
+        /// <summary>
+        /// Change match Odd
+        /// </summary>
+        /// <response code="204">Item changed</response>
+        /// <response code="400">Change item failed</response>  
+        /// <response code="422">Item is not valid</response>  
         [HttpPut("{id}")]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -79,6 +100,12 @@ namespace Accepted.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Add new match odd
+        /// </summary>
+        /// <response code="201">Returns the newly created item</response>
+        /// <response code="400">Add item failed</response>  
+        /// <response code="422">Item is not valid</response>  
         [HttpPost]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(MatchOddDto), StatusCodes.Status201Created)]
@@ -102,7 +129,12 @@ namespace Accepted.Controllers
             }
         }
 
-        // DELETE: api/Matches/5
+        /// <summary>
+        /// Delete match by id
+        /// </summary>
+        /// <param name="id">Match Odd id</param>\
+        /// <response code="204">Item deleted</response>
+        /// <response code="400">Delete item failed</response>  
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MatchOddDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
