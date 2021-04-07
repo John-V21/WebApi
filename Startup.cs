@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Accepted.ModelValidators;
 
 namespace Accepted
 {
@@ -21,10 +22,13 @@ namespace Accepted
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddServices();
+            services.AddFluentValidation( c =>
+                c.Add<MatchOddValidator>()
+                 .Add<MatchValidator>()
+            );
             services.AddControllers();
              services.AddDbContext<AppDbContext>(
                      options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionMssql")));
-            //services.AddDbContext<AppDbContext>();
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen();
         }
