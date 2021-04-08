@@ -32,6 +32,9 @@ fluentValidator.ThrowIfInvalid(match)
 ###### Docker Support
 
 docker-compose build
+
 docker-compose up
+
 visit
+
 http://localhost:5001/swagger
