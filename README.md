@@ -15,6 +15,18 @@ ID | MatchId | Specifier | Odd
 
 ###### FluentValidation using DI and manual validation
 
+Crate validator
+
+```C#
+    public class MatchValidator : AbstractValidator<Match>
+    {
+        public MatchValidator()
+        {
+            RuleFor(x => x.TeamA).Must((model, field) => model.TeamA != model.TeamB).WithMessage("TeamA and TeamB cannot be equal");
+        }
+    }
+```
+
 Inject validators on startup (injects FluentValidator)
 
 ```C#
@@ -22,7 +34,7 @@ services.AddFluentValidation( c => c.Add<MatchOddValidator>().Add<MatchValidator
 );
 ```
 
-manually test an object using injecsted validators
+manually test an object using FluentValidator
 
 ```C#
 fluentValidator.ThrowIfInvalid(match)
