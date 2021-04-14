@@ -26,8 +26,9 @@ namespace Accepted
                 {
                     webBuilder.ConfigureKestrel(options =>
                     {
-                        options.ListenAnyIP(5001);
                     });
+                    webBuilder.UseUrls("http://0.0.0.0:5001/");
+                    webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 });
     }
