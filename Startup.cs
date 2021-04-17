@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Accepted.ModelValidators;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using FluentValidation;
 
 namespace Accepted
 {
@@ -28,8 +29,9 @@ namespace Accepted
                 c.Add<MatchOddValidator>()
                  .Add<MatchValidator>()
             );
+
             services.AddControllers();
-             services.AddDbContext<AppDbContext>(
+            services.AddDbContext<AppDbContext>(
                      options => options.UseSqlServer(Configuration.GetConnectionString("ConnectionMssql")));
             services.AddAutoMapper(typeof(Startup));
             services.AddSwaggerGen( c => {

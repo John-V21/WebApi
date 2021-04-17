@@ -20,7 +20,7 @@ namespace Accepted.Controllers
     {
         private readonly IMatchOddsService _matchOddsService;
         private readonly IMapper _mapper;
-        public static IActionResult ValidationError(ValidationErrorsException ex) => new JsonResult(ex.Errors) { StatusCode = 422 };
+        public static IActionResult ValidationError(FluentValidationException  ex) => new JsonResult(ex.Errors) { StatusCode = 422 };
 
         public MatchOddsController(IMatchOddsService matchService, IMapper mapper)
         {
@@ -82,14 +82,14 @@ namespace Accepted.Controllers
         [HttpPut("{id}")]
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(ValidationErrorList))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(FluentValidationErrorList))]
         public async Task<IActionResult> Put(int id, MatchOddDto match)
         {
             try
             {
                 await _matchOddsService.Save(id, _mapper.Map<MatchOdd>(match));
             }
-            catch (ValidationErrorsException ve)
+            catch (FluentValidationException  ve)
             {
                 return ValidationError(ve);
             }
@@ -110,7 +110,7 @@ namespace Accepted.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(typeof(MatchOddDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(ValidationErrorList))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(FluentValidationErrorList))]
         public async Task<IActionResult> Post(MatchOddDto MatchOddDto)
         {
             try
@@ -119,7 +119,7 @@ namespace Accepted.Controllers
                 MatchOddDto = _mapper.Map<MatchOddDto>(match);
                 return CreatedAtAction("Get", new { id = MatchOddDto.Id }, MatchOddDto);
             }
-            catch (ValidationErrorsException ve)
+            catch (FluentValidationException  ve)
             {
                 return ValidationError(ve);
             }

@@ -1,4 +1,5 @@
 ﻿using Accepted.FluentValidation;
+using FluentValidation;
 using System;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -10,8 +11,16 @@ namespace Microsoft.Extensions.DependencyInjection
             var options = new FluentValidationOptions();
             configure.Invoke(options);
 
-            iServiceCollection.AddSingleton(new FluentValidator(options));
+            // inject validators
+            foreach(var validator in options.Validators)
+            {
+                iServiceCollection.AddSingleton(validator);
+                iServiceCollection.AddSingleton(typeof(IValidator), (sp) => sp.GetService(validator));
+            }
 
+            // inject IFluentValidatorList && FluentValidator
+            iServiceCollection.AddSingleton<IFluentValidatorList, FluentValidatorList>();
+            iServiceCollection.AddSingleton<FluentValidator>();
             return iServiceCollection;
         }
     }
