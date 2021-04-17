@@ -15,7 +15,7 @@ ID | MatchId | Specifier | Odd
 
 ###### FluentValidation using DI and manual validation
 
-Crate validator
+Create validator for a class (eg Match)
 
 ```C#
     public class MatchValidator : AbstractValidator<Match>
@@ -27,14 +27,14 @@ Crate validator
     }
 ```
 
-Inject validators on startup (injects FluentValidator)
+Inject validators on startup (injects FluentValidator service)
 
 ```C#
 services.AddFluentValidation( c => c.Add<MatchOddValidator>().Add<MatchValidator>()
 );
 ```
 
-manually test an object using FluentValidator
+manually test an object using injected FluentValidator service
 
 ```C#
 fluentValidator.ThrowIfInvalid(match)
