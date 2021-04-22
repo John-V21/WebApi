@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Accepted.Models;
 using Accepted.DTOs;
-using AutoMapper;
 using Accepted.Services;
 using System.Net.Mime;
 using Accepted.FluentValidation;
@@ -19,13 +17,11 @@ namespace Accepted.Controllers
     public class MatchOddsController : ControllerBase
     {
         private readonly IMatchOddsService _matchOddsService;
-        private readonly IMapper _mapper;
         public static IActionResult ValidationError(FluentValidationException  ex) => new JsonResult(ex.Errors) { StatusCode = 422 };
 
-        public MatchOddsController(IMatchOddsService matchService, IMapper mapper)
+        public MatchOddsController(IMatchOddsService matchService)
         {
             _matchOddsService = matchService;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -36,8 +32,7 @@ namespace Accepted.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IList<MatchOddDto>))]
         public async Task<ActionResult<IEnumerable<MatchOddDto>>> GetMAll()
         {
-            var list = await _matchOddsService.Get();
-            return list.Select(m => _mapper.Map<MatchOddDto>(m)).ToList();
+            return new JsonResult(await _matchOddsService.Get());
         }
 
         /// <summary>
@@ -50,14 +45,12 @@ namespace Accepted.Controllers
         public async Task<ActionResult<MatchOddDto>> Get(int id)
         {
             var match = await _matchOddsService.Get(id);
-            var MatchOddDto = _mapper.Map<MatchOddDto>(match);
-
             if (match == null)
             {
                 return NotFound();
             }
 
-            return MatchOddDto;
+            return match;
         }
 
         /// <summary>
@@ -69,8 +62,7 @@ namespace Accepted.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IList<MatchOddDto>))]
         public ActionResult<IEnumerable<MatchOddDto>> GetByMatch(int id)
         {
-            var matchOdds = _matchOddsService.GetByMatch(id);
-            return matchOdds.Select(mo => _mapper.Map<MatchOddDto>(mo)).ToList();
+            return _matchOddsService.GetByMatch(id).ToList();
         }
 
         /// <summary>
@@ -87,7 +79,7 @@ namespace Accepted.Controllers
         {
             try
             {
-                await _matchOddsService.Save(id, _mapper.Map<MatchOdd>(match));
+                await _matchOddsService.Save(id, match);
             }
             catch (FluentValidationException  ve)
             {
@@ -111,13 +103,12 @@ namespace Accepted.Controllers
         [ProducesResponseType(typeof(MatchOddDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(FluentValidationErrorList))]
-        public async Task<IActionResult> Post(MatchOddDto MatchOddDto)
+        public async Task<IActionResult> Post(MatchOddDto matchOddDto)
         {
             try
             {
-                var match = await _matchOddsService.Add(_mapper.Map<MatchOddDto, MatchOdd>(MatchOddDto));
-                MatchOddDto = _mapper.Map<MatchOddDto>(match);
-                return CreatedAtAction("Get", new { id = MatchOddDto.Id }, MatchOddDto);
+                var match = await _matchOddsService.Add(matchOddDto);
+                return CreatedAtAction("Get", new { id = match.Id }, match);
             }
             catch (FluentValidationException  ve)
             {
@@ -142,7 +133,7 @@ namespace Accepted.Controllers
         {
             try
             {
-                return  _mapper.Map<MatchOddDto>(await _matchOddsService.Delete(id));
+                return  await _matchOddsService.Delete(id);
             }
             catch (Exception ex)
             {

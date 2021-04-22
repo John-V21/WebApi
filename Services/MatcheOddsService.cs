@@ -7,6 +7,8 @@ using Accepted.DBContext;
 using Accepted.Models;
 using FluentValidation;
 using Accepted.FluentValidation;
+using AutoMapper;
+using Accepted.DTOs;
 
 namespace Accepted.Services
 {
@@ -14,29 +16,33 @@ namespace Accepted.Services
     {
         private readonly AppDbContext _context;
         private readonly FluentValidator _modelValidators;
+        private readonly IMapper _mapper;
 
-        public MatchOddsService(AppDbContext context, FluentValidator modelValidators)
+        public MatchOddsService(AppDbContext context, FluentValidator modelValidators, IMapper mapper)
         {
             _context = context;
             _modelValidators = modelValidators;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<MatchOdd>> Get()
+        public async Task<IEnumerable<MatchOddDto>> Get()
         {
-            return await _context.MatchOdds.ToListAsync();
+            return await _context.MatchOdds.Select(m => _mapper.Map<MatchOddDto>(m)).ToListAsync();
         }
 
-        public async Task<MatchOdd> Get(int id)
+        public async Task<MatchOddDto> Get(int id)
         {
-            return await _context.MatchOdds.FindAsync(id);
+            return _mapper.Map<MatchOddDto>(await _context.MatchOdds.FindAsync(id));
         }
 
-        public async Task Save(int id, MatchOdd matchOdd)
+        public async Task Save(int id, MatchOddDto matchOddDto)
         {
-            if (id != matchOdd.Id)
+            if (id != matchOddDto.Id)
             {
                 throw new ArgumentException("Invalid id");
             }
+
+            var matchOdd = _mapper.Map<MatchOdd>(matchOddDto);
 
             _modelValidators.ThrowIfInvalid(matchOdd);
 
@@ -59,15 +65,16 @@ namespace Accepted.Services
             }
         }
 
-        public async Task<MatchOdd> Add(MatchOdd matchOdd)
+        public async Task<MatchOddDto> Add(MatchOddDto matchOddDto)
         {
             try
             {
+                var matchOdd = _mapper.Map<MatchOdd>(matchOddDto);
                 _modelValidators.ThrowIfInvalid(matchOdd);
 
                 var addedMatchOdd = _context.MatchOdds.Add(matchOdd);
                 await _context.SaveChangesAsync();
-                return addedMatchOdd.Entity;
+                return _mapper.Map<MatchOddDto>(addedMatchOdd.Entity);
             }
             catch (DbUpdateException ex)
             {
@@ -75,7 +82,7 @@ namespace Accepted.Services
             }
         }
 
-        public async Task<MatchOdd> Delete(int id)
+        public async Task<MatchOddDto> Delete(int id)
         {
             var matchOdd = await _context.MatchOdds.FindAsync(id);
             if (matchOdd == null)
@@ -86,7 +93,7 @@ namespace Accepted.Services
             _context.MatchOdds.Remove(matchOdd);
             await _context.SaveChangesAsync();
 
-            return matchOdd;
+            return _mapper.Map<MatchOddDto>(matchOdd);
         }
 
         private bool Exists(int id)
@@ -94,9 +101,9 @@ namespace Accepted.Services
             return _context.MatchOdds.Any(e => e.Id == id);
         }
 
-        public IEnumerable<MatchOdd> GetByMatch(int id)
+        public IEnumerable<MatchOddDto> GetByMatch(int id)
         {
-            return _context.MatchOdds.Where(mo => mo.MatchId == id).ToList();
+            return _context.MatchOdds.Where(mo => mo.MatchId == id).Select(m => _mapper.Map<MatchOddDto>(m)).ToList();
         }
     }
 }

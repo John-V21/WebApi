@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Accepted.Services;
-using Accepted.Models;
-using AutoMapper;
 using Accepted.DTOs;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Http;
@@ -19,14 +16,12 @@ namespace Accepted.Controllers
     public class MatchesController : ControllerBase
     {
         private readonly IMatchesService _matchService;
-        private readonly IMapper _mapper;
 
         public static IActionResult ValidationError(FluentValidationException  ex) => new JsonResult(ex.Errors) { StatusCode = 422 };
 
-        public MatchesController(IMatchesService matchService, IMapper mapper)
+        public MatchesController(IMatchesService matchService)
         {
             _matchService = matchService;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -37,8 +32,7 @@ namespace Accepted.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IList<MatchDto>))]
         public async Task<ActionResult<IEnumerable<MatchDto>>> GetAll()
         {
-            var list =  await _matchService.Get();
-            return list.Select( m => _mapper.Map<MatchDto>(m) ).ToList();
+            return new JsonResult(await _matchService.Get());
         }
 
         /// <summary>
@@ -51,14 +45,12 @@ namespace Accepted.Controllers
         public async Task<ActionResult<MatchDto>> Get(int id)
         {
             var match = await _matchService.Get(id);
-            var matchDto = _mapper.Map<MatchDto>(match);
-
             if (match == null)
             {
                 return NotFound();
             }
 
-            return matchDto;
+            return match;
         }
 
         /// <summary>
@@ -76,7 +68,7 @@ namespace Accepted.Controllers
         {
             try
             {
-                await _matchService.Save(id, _mapper.Map<Match>(match));
+                await _matchService.Save(id, match);
             }
             catch (FluentValidationException  ve)
             {
@@ -104,9 +96,8 @@ namespace Accepted.Controllers
         {
             try
             {
-                var match = await _matchService.Add(_mapper.Map<MatchDto, Match>(matchDto));
-                matchDto = _mapper.Map<MatchDto>(match);
-                return CreatedAtAction("Get", new { id = matchDto.Id }, matchDto);
+                var match = await _matchService.Add(matchDto);
+                return CreatedAtAction("Get", new { id = match.Id }, match);
             }
             catch (FluentValidationException  ve)
             {
@@ -131,7 +122,7 @@ namespace Accepted.Controllers
         {
             try
             {
-                return _mapper.Map<MatchDto>(await _matchService.Delete(id));
+                return await _matchService.Delete(id);
             }
             catch (Exception ex)
             {

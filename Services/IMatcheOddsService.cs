@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Accepted.Services
 {
-    public interface IMatchOddsService : ICRUDService<MatchOdd, int>
+    public interface IMatchOddsService : ICRUDService<MatchOddDto, int>
     {
-        IEnumerable<MatchOdd> GetByMatch(int id);
+        IEnumerable<MatchOddDto> GetByMatch(int id);
     }
 }

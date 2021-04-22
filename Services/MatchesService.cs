@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Accepted.DBContext;
 using Accepted.Models;
 using Accepted.FluentValidation;
+using AutoMapper;
+using Accepted.DTOs;
 
 namespace Accepted.Services
 {
@@ -14,31 +16,32 @@ namespace Accepted.Services
     {
         private readonly AppDbContext _context;
         private readonly FluentValidator _modelValidators;
+        private readonly IMapper _mapper;
 
-
-        public MatchesService(AppDbContext context, FluentValidator modelValidators)
+        public MatchesService(AppDbContext context, FluentValidator modelValidators, IMapper mapper)
         {
             _context = context;
             _modelValidators = modelValidators;
-
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<Match>> Get()
+        public async Task<IEnumerable<MatchDto>> Get()
         {
-            return await _context.Matches.ToListAsync();
+            return await _context.Matches.Select(m => _mapper.Map<MatchDto>(m)).ToListAsync();
         }
 
-        public async Task<Match> Get(int id)
+        public async Task<MatchDto> Get(int id)
         {
-            return await _context.Matches.FindAsync(id);
+            return _mapper.Map<MatchDto>(await _context.Matches.FindAsync(id));
         }
 
-        public async Task Save(int id, Match match)
+        public async Task Save(int id, MatchDto matchDto)
         {
-            if (id != match.Id)
+            if (id != matchDto.Id)
             {
                 throw new ApplicationException("Invalid Id");
             }
+            var match = _mapper.Map<Match>(matchDto);
 
             _modelValidators.ThrowIfInvalid(match);
 
@@ -61,15 +64,17 @@ namespace Accepted.Services
             }
         }
 
-        public async Task<Match> Add(Match match)
+        public async Task<MatchDto> Add(MatchDto matchDto)
         {
             try
             {
+                var match = _mapper.Map<Match>(matchDto);
+
                 _modelValidators.ThrowIfInvalid(match);
 
                 var addedMatch = _context.Matches.Add(match);
                 await _context.SaveChangesAsync();
-                return addedMatch.Entity;
+                return _mapper.Map<MatchDto>(addedMatch.Entity);
             }
             catch(DbUpdateException ex)
             {
@@ -77,7 +82,7 @@ namespace Accepted.Services
             }
         }
 
-        public async Task<Match> Delete(int id)
+        public async Task<MatchDto> Delete(int id)
         {
             var match = await _context.Matches.FindAsync(id);
             if (match == null)
@@ -88,7 +93,7 @@ namespace Accepted.Services
             _context.Matches.Remove(match);
             await _context.SaveChangesAsync();
 
-            return match;
+            return _mapper.Map<MatchDto>(match);
         }
 
         private bool Exists(int id)
